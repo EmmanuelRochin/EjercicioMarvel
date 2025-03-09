@@ -20,7 +20,7 @@ public class MarvelServiceImpl implements MarvelService {
     private RestTemplate restTemplate;
 
     @Override
-    public List<CharacterResponse> getCharacters() {
+    public List<CharacterResponse> getCharacters(Integer limit) {
         List<CharacterResponse> characters = new ArrayList<>();
         String url=UriComponentsBuilder.newInstance()
                 .scheme("http")
@@ -29,6 +29,7 @@ public class MarvelServiceImpl implements MarvelService {
                 .queryParam("ts", marvelConfig.getTs())
                 .queryParam("apikey", marvelConfig.getApikey())
                 .queryParam("hash", marvelConfig.getHash())
+                .queryParam("limit", limit)
                 .toUriString();
 
         ResponseApiMarvel response = restTemplate.getForObject(url, ResponseApiMarvel.class);

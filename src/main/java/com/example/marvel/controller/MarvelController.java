@@ -16,43 +16,51 @@ public class MarvelController {
 
     @Autowired
     private MarvelService marvelService;
+    private final String correctType = "SUCCESS";
+    private final String correctAction = "CONTINUE";
+    private final String errorType = "ERROR";
+    private final String errorAction = "CANCEL";
 
     @GetMapping("/characters")
-    public ResponseEntity<Response> obtenerPersonajes() {
+    public ResponseEntity<Response> getCharacters(@RequestParam Integer limit) {
         Response response = new Response();
-        List<CharacterResponse> listResponse = marvelService.getCharacters();
-        if(!listResponse.isEmpty()){
-            response.setType("SUCCESS");
-            response.setAction("CONTINUE");
-            response.setData(listResponse);
-            return  new ResponseEntity<Response>(response, HttpStatus.OK);
+        if(limit>0 && limit<101){
+            List<CharacterResponse> listResponse = marvelService.getCharacters(limit);
+            if(!listResponse.isEmpty()){
+                response.setType(correctType);
+                response.setAction(correctAction);
+                response.setData(listResponse);
+                return  new ResponseEntity<Response>(response, HttpStatus.OK);
+            }else{
+                response.setType(errorType);
+                response.setAction(errorAction);
+                return  new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }else{
-            response.setType("ERROR");
-            response.setAction("CANCEL");
-            return  new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setType(errorType);
+            response.setAction(errorAction);
+            response.setCode("INVALID LIMIT");
+            response.setMessage("Provide value for limit param is invalid");
+            return  new ResponseEntity<Response>(response, HttpStatus.BAD_REQUEST);
         }
+
 
     }
     @GetMapping("/characters/{id}")
     @ResponseBody
-    public ResponseEntity<Response> obtenerPersonaje(@PathVariable Integer id) {
+    public ResponseEntity<Response> getCharacter(@PathVariable Integer id) {
         try {
             Response response = new Response();
             OneCharacterResponse oneCharacterResponse = marvelService.getCharacter(id);
-            if(oneCharacterResponse!=null){
-                response.setType("SUCCESS");
-                response.setAction("CONTINUE");
-                response.setData(oneCharacterResponse);
-                return  new ResponseEntity<Response>(response, HttpStatus.OK);
-            }else{
-                response.setType("ERROR");
-                response.setAction("CANCEL");
-                return  new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-
+            response.setType(correctType);
+            response.setAction(correctAction);
+            response.setData(oneCharacterResponse);
+            return  new ResponseEntity<Response>(response, HttpStatus.OK);
         } catch (RuntimeException e) {
             Response errorResponse = new Response();
             errorResponse.setData(e.toString());
+            errorResponse.setType(errorType);
+            errorResponse.setAction(errorAction);
             return  new ResponseEntity<Response>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
