@@ -23,26 +23,35 @@ public class MarvelController {
 
     @GetMapping("/characters")
     public ResponseEntity<Response> getCharacters(@RequestParam Integer limit) {
-        Response response = new Response();
-        if(limit>0 && limit<101){
-            List<CharacterResponse> listResponse = marvelService.getCharacters(limit);
-            if(!listResponse.isEmpty()){
-                response.setType(correctType);
-                response.setAction(correctAction);
-                response.setData(listResponse);
-                return  new ResponseEntity<Response>(response, HttpStatus.OK);
+        try {
+            Response response = new Response();
+            if(limit>0 && limit<101){
+                List<CharacterResponse> listResponse = marvelService.getCharacters(limit);
+                if(!listResponse.isEmpty()){
+                    response.setType(correctType);
+                    response.setAction(correctAction);
+                    response.setData(listResponse);
+                    return  new ResponseEntity<Response>(response, HttpStatus.OK);
+                }else{
+                    response.setType(errorType);
+                    response.setAction(errorAction);
+                    return  new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                }
             }else{
                 response.setType(errorType);
                 response.setAction(errorAction);
-                return  new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                response.setCode("INVALID LIMIT");
+                response.setMessage("Provide value for limit param is invalid");
+                return  new ResponseEntity<Response>(response, HttpStatus.BAD_REQUEST);
             }
-        }else{
-            response.setType(errorType);
-            response.setAction(errorAction);
-            response.setCode("INVALID LIMIT");
-            response.setMessage("Provide value for limit param is invalid");
-            return  new ResponseEntity<Response>(response, HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            Response errorResponse = new Response();
+            errorResponse.setData(e.toString());
+            errorResponse.setType(errorType);
+            errorResponse.setAction(errorAction);
+            return  new ResponseEntity<Response>(errorResponse, HttpStatus.BAD_REQUEST);
         }
+
 
 
     }

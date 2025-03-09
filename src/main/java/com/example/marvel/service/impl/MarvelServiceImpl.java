@@ -21,27 +21,31 @@ public class MarvelServiceImpl implements MarvelService {
 
     @Override
     public List<CharacterResponse> getCharacters(Integer limit) {
-        List<CharacterResponse> characters = new ArrayList<>();
-        String url=UriComponentsBuilder.newInstance()
-                .scheme("http")
-                .host(marvelConfig.getUrl())
-                .path("/v1/public/characters")
-                .queryParam("ts", marvelConfig.getTs())
-                .queryParam("apikey", marvelConfig.getApikey())
-                .queryParam("hash", marvelConfig.getHash())
-                .queryParam("limit", limit)
-                .toUriString();
+        try {
+            List<CharacterResponse> characters = new ArrayList<>();
+            String url=UriComponentsBuilder.newInstance()
+                    .scheme("http")
+                    .host(marvelConfig.getUrl())
+                    .path("/v1/public/characters")
+                    .queryParam("ts", marvelConfig.getTs())
+                    .queryParam("apikey", marvelConfig.getApikey())
+                    .queryParam("hash", marvelConfig.getHash())
+                    .queryParam("limit", limit)
+                    .toUriString();
 
-        ResponseApiMarvel response = restTemplate.getForObject(url, ResponseApiMarvel.class);
-        assert response != null;
-        for(Character character: response.getData().getResults()){
-            characters.add(new CharacterResponse(
-                    character.getId(),
-                    character.getName(),
-                    character.getDescription(),
-                    character.getThumbnail().getPath()+"."+character.getThumbnail().getExtension()));
+            ResponseApiMarvel response = restTemplate.getForObject(url, ResponseApiMarvel.class);
+            assert response != null;
+            for(Character character: response.getData().getResults()){
+                characters.add(new CharacterResponse(
+                        character.getId(),
+                        character.getName(),
+                        character.getDescription(),
+                        character.getThumbnail().getPath()+"."+character.getThumbnail().getExtension()));
+            }
+            return characters;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return characters;
     }
 
     @Override
